@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+elasticsearch==8.12.0
+openai
+langchain
+langchain-huggingface
+python-dotenv
+pydantic
+requests
+pandas
+# for charts/data processing if needed
+matplotlib
+pytest
+httpx
+pytest-asyncio

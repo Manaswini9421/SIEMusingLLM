@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# binaries
+elasticsearch/
+elasticsearch-*.jar
+jdk/
+
+# Misc
+.DS_Store
+*.log
