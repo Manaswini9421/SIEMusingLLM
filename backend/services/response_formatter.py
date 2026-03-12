@@ -38,8 +38,23 @@ class ResponseFormatter:
             
             response = self.llm_service.get_response(prompt)
             
-            # Simple cleanup
-            clean_response = response.replace("```json", "").replace("```", "").strip()
+            # Robust cleanup
+            clean_response = response.strip()
+            
+            # Remove markdown code blocks
+            if "```" in clean_response:
+                import re
+                json_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", clean_response, re.DOTALL)
+                if json_match:
+                    clean_response = json_match.group(1)
+                else:
+                    clean_response = clean_response.replace("```json", "").replace("```", "").strip()
+            
+            # Extract only the JSON object (handle extra text after JSON)
+            import re
+            json_match = re.search(r"(\{[^{}]*\{[^{}]*\}[^{}]*\}|\{[^{}]*\})", clean_response, re.DOTALL)
+            if json_match:
+                clean_response = json_match.group(1)
             
             import json
             return json.loads(clean_response)

@@ -43,7 +43,12 @@ class QueryGenerator:
                 else:
                     clean_response = clean_response.replace("```json", "").replace("```", "").strip()
 
-            # 2. Heuristic repair for missing closing braces (common in truncated LLM outputs)
+            # 2. Extract only the first complete JSON object (handles extra text after JSON)
+            json_match = re.search(r"(\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\})", clean_response, re.DOTALL)
+            if json_match:
+                clean_response = json_match.group(1)
+            
+            # 3. Heuristic repair for missing closing braces (common in truncated LLM outputs)
             open_braces = clean_response.count('{')
             close_braces = clean_response.count('}')
             if open_braces > close_braces:
@@ -52,9 +57,11 @@ class QueryGenerator:
             
             try:
                 return json.loads(clean_response)
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e:
                 # If still failing, try one more aggressive extraction
-                json_match = re.search(r"(\{.*\})", clean_response, re.DOTALL)
+                print(f"JSON decode error: {e}")
+                print(f"Problematic JSON: {clean_response[:500]}")
+                json_match = re.search(r"(\{[^}]*\})", clean_response)
                 if json_match:
                     return json.loads(json_match.group(1))
                 raise
